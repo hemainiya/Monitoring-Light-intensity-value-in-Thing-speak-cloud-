@@ -90,10 +90,69 @@ Prototype and build IoT systems without setting up servers or developing web sof
 
  
 # PROGRAM:
-# CIRCUIT DIAGRAM:
-# OUTPUT:
-# RESULT:
+ ```#define ldr_pin 34
+#define led_pin 2
+#include "ThingSpeak.h"
+#include <WiFi.h>
 
+char ssid[] = "IQOO Z9s Pro 5G";
+char pass[] = "8610354275";
+
+int ldrValue = 0;
+int lightPercentage = 0;
+const int darkValue = 4095;
+const int brightValue = 0;
+
+WiFiClient client;
+
+unsigned long myChannelNumber = 3119267;
+const int LightIntensityField = 1;
+const char* myWriteAPIKey = "VLN6V9CKFA4XP96U";
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(ldr_pin, INPUT);
+  pinMode(led_pin, OUTPUT);
+  WiFi.mode(WIFI_STA);
+  ThingSpeak.begin(client);
+}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.print("Attempting to connect to SSID: ");
+    Serial.println(ssid);
+    while (WiFi.status() != WL_CONNECTED) {
+      WiFi.begin(ssid, pass);
+      Serial.print(".");
+      delay(5000);
+    }
+    Serial.println("\nConnected.");
+  }
+
+  ldrValue = analogRead(ldr_pin);
+  lightPercentage = map(ldrValue, darkValue, brightValue, 0, 100);
+  lightPercentage = constrain(lightPercentage, 0, 100);
+
+  Serial.print("Intensity = ");
+  Serial.print(lightPercentage);
+  Serial.println("%");
+
+  if (lightPercentage < 50)
+    digitalWrite(led_pin, HIGH);
+  else
+    digitalWrite(led_pin, LOW);
+
+  ThingSpeak.writeField(myChannelNumber, LightIntensityField, lightPercentage, myWriteAPIKey);
+  delay(5000);
+}
+```
+# CIRCUIT DIAGRAM:
+![WhatsApp Image 2025-10-16 at 09 46 19_e94327cb](https://github.com/user-attachments/assets/7d1f379c-d84a-4de7-9692-1cb7857a4499)
+
+# OUTPUT:
+<img width="1918" height="1148" alt="Screenshot 2025-10-16 094508" src="https://github.com/user-attachments/assets/26f0f2ec-6b40-474b-b2a9-154e3f6e5473" />
+
+# RESULT:
 Thus the light intensity values are updated in the Thing speak cloud using ESP32 controller.
 
 
